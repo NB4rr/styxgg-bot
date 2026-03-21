@@ -15,8 +15,8 @@ const client = new Client({
 
 /* ======================= BASIC CONFIG ======================= */
 const PREFIX = "?";
-const DEFAULT_TAG = "𝙎𝙏𝙓🌙";
-let CUSTOM_TAG = DEFAULT_TAG;
+const DEFAULT_TAG = "";
+let CUSTOM_TAG = "";
 
 /* ======================= DEVELOPERS ======================= */
 const DEVELOPERS = new Set([
@@ -89,7 +89,7 @@ client.once("ready", () => {
         activities: [{ name: "NB4rr Bot Safe Mode", type: 0 }],
         status: "online"
     });
-    console.log(`🏠 Bot is ready! Custom tag set to: ${CUSTOM_TAG}`);
+    console.log(`🏠 Bot is ready! No tag set by default.`);
 });
 
 /* ======================= MESSAGE HANDLER ======================= */
@@ -189,16 +189,17 @@ client.on("messageCreate", async (message) => {
 `Uptime: ${hours}h ${minutes}m\n` +
 `Memory: ${memoryUsageMB} MB\n` +
 `Guilds: ${client.guilds.cache.size}\n` +
-`Current tag: ${CUSTOM_TAG}`
+`Current tag: ${CUSTOM_TAG || "None"}`
             );
         }
 
         /* ======================= TAG ======================= */
         if (command === "tag") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!CUSTOM_TAG) return message.reply("❌ No tag set, use `?settag <text>` first");
             const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
             if (!member) return message.reply("❌ Mention a valid member");
-            let cleanName = member.displayName.replace(/^.+?\s*\|\s*/, "").trim() || member.user.username;
+            let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim() || member.user.username;
             await member.setNickname(`${CUSTOM_TAG} ${cleanName}`).catch(() => {});
             return message.reply(`<a:done:1347594035208130662> Tagged ${member.user.tag}`);
         }
@@ -206,12 +207,13 @@ client.on("messageCreate", async (message) => {
         /* ======================= TAGALL ======================= */
         if (command === "tagall") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!CUSTOM_TAG) return message.reply("❌ No tag set, use `?settag <text>` first");
             const startTime = Date.now();
             const members = await message.guild.members.fetch();
             let count = 0;
             for (const [, member] of members) {
                 if (member.user.bot) continue;
-                let cleanName = member.displayName.replace(/^.+?\s*\|\s*/, "").trim() || member.user.username;
+                let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim() || member.user.username;
                 await member.setNickname(`${CUSTOM_TAG} ${cleanName}`).catch(() => {});
                 count++;
             }
@@ -235,12 +237,14 @@ client.on("messageCreate", async (message) => {
         /* ======================= UNTAGALL ======================= */
         if (command === "untagall") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!CUSTOM_TAG) return message.reply("❌ No tag set, nothing to remove");
             const startTime = Date.now();
             const members = await message.guild.members.fetch();
             let count = 0;
             for (const [, member] of members) {
                 if (member.user.bot) continue;
-                await member.setNickname(null).catch(() => {});
+                let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim();
+                await member.setNickname(cleanName || null).catch(() => {});
                 count++;
             }
             const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -269,14 +273,14 @@ client.on("messageCreate", async (message) => {
 
         /* ======================= CURRENTTAG ======================= */
         if (command === "currenttag") {
-            return message.reply(`🏷️ Current tag: ${CUSTOM_TAG}`);
+            return message.reply(`🏷️ Current tag: ${CUSTOM_TAG || "None"}`);
         }
 
         /* ======================= RESETTAG ======================= */
         if (command === "resettag") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            CUSTOM_TAG = DEFAULT_TAG;
-            return message.reply(`<a:done:1347594035208130662> Tag reset to: ${CUSTOM_TAG}`);
+            CUSTOM_TAG = "";
+            return message.reply(`<a:done:1347594035208130662> Tag has been reset`);
         }
 
         /* ======================= ADDDEV ======================= */
@@ -532,18 +536,23 @@ client.on("messageCreate", async (message) => {
     }
 });
 
+/* ======================= ESCAPE REGEX HELPER ======================= */
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /* ======================= AUTO TAG + WELCOME DM ======================= */
 client.on("guildMemberAdd", async (member) => {
     if (member.user.bot) return;
-    try {
-        let oldNickname = member.displayName;
-        const tagPattern = /^(?:STX|𝙎𝙏𝙓)?[🌙🧣⚡✨⭐🌟🔆]?\s*(?:\|\s*)?/;
-        let cleanName = oldNickname.replace(tagPattern, '');
-        if (!cleanName.trim()) cleanName = oldNickname;
-        await member.setNickname(`${CUSTOM_TAG} ${cleanName.trim()}`);
-        console.log(`<a:done:1347594035208130662> Auto-tagged new member: ${member.user.tag} with ${CUSTOM_TAG}`);
-    } catch (error) {
-        console.log(`⚠️ Unable to tag ${member.user.tag}: ${error.message}`);
+    if (CUSTOM_TAG) {
+        try {
+            let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim();
+            if (!cleanName) cleanName = member.user.username;
+            await member.setNickname(`${CUSTOM_TAG} ${cleanName}`);
+            console.log(`✅ Auto-tagged new member: ${member.user.tag} with ${CUSTOM_TAG}`);
+        } catch (error) {
+            console.log(`⚠️ Unable to tag ${member.user.tag}: ${error.message}`);
+        }
     }
     try {
         await member.send(
