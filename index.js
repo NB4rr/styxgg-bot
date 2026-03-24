@@ -101,8 +101,7 @@ client.once("ready", () => {
         activities: [{ name: "NB4rr Bot Safe Mode", type: 0 }],
         status: "online"
     });
-    console.log(`🏠 Bot is ready! No tag set by default.`);
-    console.log(`🔒 Protection spéciale pour l'owner bot (1274503092154404908) activée ! 👑`);
+    console.log(`🏠 Bot is ready! Custom tag set to: ${CUSTOM_TAG}`);
 });
 
 /* ======================= MESSAGE HANDLER ======================= */
